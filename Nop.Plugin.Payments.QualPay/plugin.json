@@ -1,0 +1,11 @@
+﻿{
+  "Group": "Payment methods",
+  "FriendlyName": "Qualpay",
+  "SystemName": "Payments.Qualpay",
+  "Version": "1.65",
+  "SupportedVersions": [ "4.40" ],
+  "Author": "nopCommerce team, Nop-Station Team",
+  "DisplayOrder": 1,
+  "FileName": "Nop.Plugin.Payments.Qualpay.dll",
+  "Description": "This plugin allows paying with Qualpay payment gateway"
+}
