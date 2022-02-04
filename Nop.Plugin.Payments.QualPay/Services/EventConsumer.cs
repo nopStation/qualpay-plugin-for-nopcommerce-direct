@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Nop.Core.Domain.Orders;
 using Nop.Core.Events;
 using Nop.Services.Events;
@@ -21,27 +22,31 @@ namespace Nop.Plugin.Payments.Qualpay.Services
 
         private readonly IOrderService _orderService;
         private readonly IPaymentPluginManager _paymentPluginManager;
+        private readonly INopHtmlHelper _nopHtmlHelper;
+        private readonly IActionContextAccessor _actionContextAccessor;
 
         #endregion
 
         #region Ctor
 
         public EventConsumer(IOrderService orderService,
-            IPaymentPluginManager paymentPluginManager)
+            IPaymentPluginManager paymentPluginManager, 
+            INopHtmlHelper nopHtmlHelper,
+            IActionContextAccessor actionContextAccessor)
         {
             _orderService = orderService;
             _paymentPluginManager = paymentPluginManager;
+            _nopHtmlHelper = nopHtmlHelper;
+            _actionContextAccessor = actionContextAccessor;
         }
 
         #endregion
 
         #region Methods
 
-       
-
         public async Task HandleEventAsync(PageRenderingEvent eventMessage)
         {
-            if (eventMessage?.Helper?.ViewContext?.ActionDescriptor == null)
+            if (_actionContextAccessor.ActionContext.ActionDescriptor == null)
                 return;
 
             //check whether the plugin is active
@@ -51,8 +56,8 @@ namespace Nop.Plugin.Payments.Qualpay.Services
             //add Embedded Fields sсript and styles to the one page checkout
             if (eventMessage.GetRouteName()?.Equals(QualpayDefaults.OnePageCheckoutRouteName) ?? false)
             {
-                eventMessage.Helper.AddScriptParts(ResourceLocation.Footer, QualpayDefaults.EmbeddedFieldsScriptPath, excludeFromBundle: true);
-                eventMessage.Helper.AddCssFileParts(QualpayDefaults.EmbeddedFieldsStylePath, excludeFromBundle: true);
+                _nopHtmlHelper.AddScriptParts(ResourceLocation.Footer, QualpayDefaults.EmbeddedFieldsScriptPath);
+                _nopHtmlHelper.AddCssFileParts(QualpayDefaults.EmbeddedFieldsStylePath, string.Empty);
             }
         }
 

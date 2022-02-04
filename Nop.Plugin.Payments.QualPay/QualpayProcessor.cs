@@ -15,6 +15,7 @@ using Nop.Plugin.Payments.Qualpay.Validators;
 using Nop.Services.Cms;
 using Nop.Services.Configuration;
 using Nop.Services.Localization;
+using Nop.Services.Orders;
 using Nop.Services.Payments;
 using Nop.Services.Plugins;
 using Nop.Web.Framework.Infrastructure;
@@ -34,7 +35,7 @@ namespace Nop.Plugin.Payments.Qualpay
         private readonly WidgetSettings _widgetSettings;
         private readonly QualpaySettings _qualpaySettings;
         private readonly QualpayManager _qualpayManager;
-        private readonly IPaymentService _paymentService;
+        private readonly IOrderTotalCalculationService _orderTotalCalculationService;
 
         #endregion
 
@@ -46,7 +47,7 @@ namespace Nop.Plugin.Payments.Qualpay
             WidgetSettings widgetSettings,
             QualpaySettings qualpaySettings,
             QualpayManager qualpayManager,
-            IPaymentService paymentService)
+            IOrderTotalCalculationService orderTotalCalculationService)
         {
             _localizationService = localizationService;
             _webHelper = webHelper;
@@ -54,7 +55,7 @@ namespace Nop.Plugin.Payments.Qualpay
             _widgetSettings = widgetSettings;
             _qualpaySettings = qualpaySettings;
             _qualpayManager = qualpayManager;
-            _paymentService = paymentService;
+            _orderTotalCalculationService = orderTotalCalculationService;
         }
         #endregion
         public bool SupportCapture => true;
@@ -110,7 +111,7 @@ namespace Nop.Plugin.Payments.Qualpay
 
         public async Task<decimal> GetAdditionalHandlingFeeAsync(IList<ShoppingCartItem> cart)
         {
-            return await _paymentService.CalculateAdditionalFeeAsync(cart,
+            return await _orderTotalCalculationService.CalculatePaymentAdditionalFeeAsync(cart,
                 _qualpaySettings.AdditionalFee, _qualpaySettings.AdditionalFeePercentage);
         }
 
@@ -323,7 +324,7 @@ namespace Nop.Plugin.Payments.Qualpay
             }
 
             //locales
-            await _localizationService.AddLocaleResourceAsync(new Dictionary<string, string>
+            await _localizationService.AddOrUpdateLocaleResourceAsync(new Dictionary<string, string>
             {
                 ["Enums.Nop.Plugin.Payments.Qualpay.Domain.Authorization"] = "Authorization",
                 ["Enums.Nop.Plugin.Payments.Qualpay.Domain.Sale"] = "Sale (authorization and capture)",
@@ -401,9 +402,6 @@ namespace Nop.Plugin.Payments.Qualpay
             return $"{_webHelper.GetStoreLocation()}Admin/Qualpay/Configure";
         }
         #endregion
-
-
-
 
     }
 }
